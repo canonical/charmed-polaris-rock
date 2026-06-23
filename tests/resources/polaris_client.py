@@ -4,15 +4,14 @@ from pyiceberg.catalog.rest import RestCatalog
 
 
 def get_catalog() -> RestCatalog:
-    host = os.environ["POLARIS_HOST"]
     return RestCatalog(
         "polaris",
         **{
-            "uri": f"{host}/api/catalog",
+            "uri": f"{os.environ['POLARIS_HOST']}/api/catalog",
             "warehouse": os.environ.get("CATALOG_NAME", "warehouse"),
             "credential": "root:s3cr3t",
             "scope": "PRINCIPAL_ROLE:ALL",
-            "oauth2-server-uri": f"{host}/api/catalog/v1/oauth/tokens",
+            "oauth2-server-uri": f"{os.environ['POLARIS_HOST']}/api/catalog/v1/oauth/tokens",
             "header.Polaris-Realm": "POLARIS",
             "header.X-Iceberg-Access-Delegation": "none",
             "s3.endpoint": os.environ["S3_ENDPOINT"],

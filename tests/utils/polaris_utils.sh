@@ -32,3 +32,52 @@ get_polaris_token() {
         -d "scope=PRINCIPAL_ROLE:ALL" | jq -r '.access_token'
 }
 
+polaris_api() {
+    # Call the Polaris management API.
+    #
+    # Arguments:
+    # $1: HTTP method
+    # $2: API path
+    # $3: Optional payload
+    # $4: Optional response file
+    method=$1
+    path=$2
+    data=${3:-}
+    response=${4:-$(mktemp)}
+
+    if [ -n "$data" ]; then
+        curl -s -o "$response" -w "%{http_code}" \
+            -X "$method" "${POLARIS_HOST}${path}" \
+            -H "Authorization: Bearer ${POLARIS_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -H "Polaris-Realm: POLARIS" \
+            -d "$data"
+    else
+        curl -s -o "$response" -w "%{http_code}" \
+            -X "$method" "${POLARIS_HOST}${path}" \
+            -H "Authorization: Bearer ${POLARIS_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -H "Polaris-Realm: POLARIS"
+    fi
+}
+
+expect_http_code() {
+    # Check that the API returned an expected status code.
+    #
+    # Arguments:
+    # $1: Response file
+    # $2: Actual HTTP code
+    # $3+: Expected HTTP codes
+    response=$1
+    http_code=$2
+    shift 2
+
+    for expected in "$@"; do
+        if [ "$http_code" = "$expected" ]; then
+            return 0
+        fi
+    done
+
+    cat "$response"
+    return 1
+}

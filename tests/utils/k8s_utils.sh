@@ -15,10 +15,10 @@ setup_namespace() {
     # Arguments
     # $1: Namespace to run the tests
 
-    export NAMESPACE=$1
+    namespace=$1
 
     echo "Setting up test namespace"
-    kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+    kubectl create namespace "$namespace" --dry-run=client -o yaml | kubectl apply -f -
 }
 
 tear_down() {
@@ -50,8 +50,7 @@ tear_down_failure() {
 }
 
 create_s3_creds_secret() {
-    # Create the S3 credentials secret if it doesn't already exist.
-    # Expects ACCESS_KEY, SECRET_KEY and optionally AWS_REGION to be set in the environment.
+    # Create the S3 credentials secret.
     #
     # Arguments:
     # $1: Namespace that contains the pod
@@ -61,7 +60,21 @@ create_s3_creds_secret() {
         --from-literal=aws-access-key-id="${ACCESS_KEY:?Set ACCESS_KEY}" \
         --from-literal=aws-secret-access-key="${SECRET_KEY:?Set SECRET_KEY}" \
         --from-literal=aws-region="${AWS_REGION:-us-east-1}"
+}
 
+create_db_creds_secret() {
+    # Create the DB credentials secret.
+    #
+    # Arguments:
+    # $1: Namespace that contains the pod
+
+    namespace=$1
+    kubectl -n "${namespace}" create secret generic polaris-db-credentials \
+        --from-literal=db-host="${DB_HOST:?Set DB_HOST}" \
+        --from-literal=db-user="${DB_USER:?Set DB_USER}" \
+        --from-literal=db-password="${DB_PASSWORD:?Set DB_PASSWORD}" \
+        --from-literal=db-name="${DB_NAME:?Set DB_NAME}" \
+        --from-literal=jdbc-url="jdbc:postgresql://${DB_HOST}/${DB_NAME}"
 }
 
 wait_for_pod_by_label() {

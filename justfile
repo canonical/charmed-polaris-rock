@@ -73,3 +73,7 @@ get-oci:
 # Test rock - basic tests
 test-basic:
     /usr/bin/env bash tests/test_basic/test.sh
+
+# Test rock - persistence tests
+test-persistence:
+    /usr/bin/env bash tests/test_persistence/test.sh
