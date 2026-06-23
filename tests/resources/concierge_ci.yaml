@@ -25,6 +25,8 @@ host:
   packages:
     - jq
     - git
+    - python3-venv
+    - python3-pip
   snaps:
     yq:
       channel: latest/stable

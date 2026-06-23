@@ -108,3 +108,7 @@ prepare: |
       exit 1
     fi
   fi
+
+  python3 -m venv "$SPREAD_PATH/.venv-tests"
+  "$SPREAD_PATH/.venv-tests/bin/pip" install -U pip
+  "$SPREAD_PATH/.venv-tests/bin/pip" install -r "$SPREAD_PATH/tests/requirements.txt"
