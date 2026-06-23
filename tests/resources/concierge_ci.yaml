@@ -24,21 +24,16 @@ providers:
 host:
   packages:
     - jq
-    - git
     - python3-venv
     - python3-pip
   snaps:
     yq:
-      channel: latest/stable
-    rockcraft:
       channel: latest/stable
     microceph:
       channel: squid/stable
     kubectl:
       channel: latest/stable
     just:
-      channel: latest/stable
-    regclient:
       channel: latest/stable
     aws-cli:
       channel: latest/stable
