@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: polaris
+  namespace: ${NAMESPACE}
+  labels:
+    app: polaris
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: polaris
+  template:
+    metadata:
+      labels:
+        app: polaris
+    spec:
+      containers:
+        - name: polaris
+          image: ${IMAGE}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8181
+            - name: management
+              containerPort: 8182
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: polaris-s3-credentials
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: polaris-s3-credentials
+                  key: aws-secret-access-key
+            - name: AWS_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: polaris-s3-credentials
+                  key: aws-region
+            - name: POLARIS_BOOTSTRAP_CREDENTIALS
+              value: "POLARIS,root,s3cr3t"
+            - name: polaris.realm-context.realms
+              value: "POLARIS"
+            - name: polaris.readiness.ignore-severe-issues
+              value: "true"
+          readinessProbe:
+            httpGet:
+              path: /q/health/ready
+              port: 8182
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /q/health/live
+              port: 8182
+            initialDelaySeconds: 15
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: polaris
+  namespace: ${NAMESPACE}
+  labels:
+    app: polaris
+spec:
+  type: LoadBalancer
+  selector:
+    app: polaris
+  ports:
+    - name: http
+      port: 8181
+      targetPort: 8181
+      protocol: TCP
+    - name: management
+      port: 8182
+      targetPort: 8182
+      protocol: TCP

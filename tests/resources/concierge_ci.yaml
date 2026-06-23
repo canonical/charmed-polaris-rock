@@ -1,0 +1,42 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+juju:
+  disable: true
+
+providers:
+  k8s:
+    enable: true
+    channel: 1.35-classic/stable
+    features:
+      local-storage:
+      load-balancer:
+        enabled: true
+        l2-mode: true
+        cidrs: 10.64.0.0/16
+    bootstrap-constraints:
+      root-disk: 4G
+
+  lxd:
+    enable: true
+    channel: 6/stable
+
+host:
+  packages:
+    - jq
+    - git
+  snaps:
+    yq:
+      channel: latest/stable
+    rockcraft:
+      channel: latest/stable
+    microceph:
+      channel: squid/stable
+    kubectl:
+      channel: latest/stable
+    just:
+      channel: latest/stable
+    regclient:
+      channel: latest/stable
+    aws-cli:
+      channel: latest/stable

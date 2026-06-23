@@ -27,40 +27,28 @@ jobs:
       - name: Setup LXD
         uses: canonical/setup-lxd@main
         with:
-          channel: 5.21/stable
+          channel: 6/stable
 
-      - name: Install dependencies
+      - name: Install tooling
         run: |
           sudo snap install yq
-          sudo snap install rockcraft --classic --edge
-          sudo snap install regclient
+          sudo snap install rockcraft --classic
+          sudo snap install regclient --classic
+          sudo snap install just --classic
 
-      - name: Build ROCK
+      - name: Build rock
         id: build
         run: |
           rockcraft pack --verbose
 
-          VERSION=$(yq '.version' rockcraft.yaml)
-          echo "rock=polaris_${VERSION}_${{ matrix.system.arch }}.tar" >> $GITHUB_OUTPUT
-
-      - name: Add additional labels
+      - name: Add additional labels and export to tar
+        id: refine
         run: |
-          COMMIT_ID=$(git log -1 --format=%H)
-          DESCRIPTION=$(yq .description rockcraft.yaml)
-          FILE=${{ steps.build.outputs.rock }}
-          VERSION=$(yq '.version' rockcraft.yaml)
+          just refine
+          echo "tar=$(just get-tar-file)" >> $GITHUB_OUTPUT
 
-          rockcraft.skopeo copy "oci-archive:${FILE%'tar'}rock" oci:to_process:latest
-          regctl image mod ocidir://to_process:latest --replace \
-            --label "org.opencontainers.image.revision=${COMMIT_ID}" \
-            --label "org.opencontainers.image.source=${{ github.repositoryUrl }}" \
-            --label "org.opencontainers.image.description=${DESCRIPTION}"
-          regctl image export ocidir://to_process:latest \
-            --name "ghcr.io/canonical/test-polaris:${VERSION}" \
-            "${FILE}"
-
-      - name: Upload locally built ROCK artifact
+      - name: Upload locally built artifact
         uses: actions/upload-artifact@v7
         with:
           name: polaris-${{ matrix.system.arch }}
-          path: ${{ steps.build.outputs.rock }}
+          path: ${{ steps.refine.outputs.tar }}
