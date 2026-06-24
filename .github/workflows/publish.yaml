@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "2.2/edge"
+      - "1/edge"
 
 permissions:
   contents: read
