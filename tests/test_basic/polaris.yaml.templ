@@ -1,3 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: polaris-config
+  namespace: ${NAMESPACE}
+data:
+  application.properties: |
+    polaris.bootstrap.credentials=POLARIS,root,s3cr3t
+    polaris.realm-context.realms=POLARIS
+    polaris.readiness.ignore-severe-issues=true
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,6 +38,8 @@ spec:
             - name: management
               containerPort: 8182
           env:
+            - name: QUARKUS_CONFIG_LOCATIONS
+              value: "file:///etc/polaris/application.properties"
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -42,12 +55,10 @@ spec:
                 secretKeyRef:
                   name: polaris-s3-credentials
                   key: aws-region
-            - name: POLARIS_BOOTSTRAP_CREDENTIALS
-              value: "POLARIS,root,s3cr3t"
-            - name: polaris.realm-context.realms
-              value: "POLARIS"
-            - name: polaris.readiness.ignore-severe-issues
-              value: "true"
+          volumeMounts:
+            - name: polaris-shared-config
+              mountPath: /etc/polaris
+              readOnly: true
           readinessProbe:
             httpGet:
               path: /q/health/ready
@@ -60,6 +71,10 @@ spec:
               port: 8182
             initialDelaySeconds: 15
             periodSeconds: 10
+      volumes:
+        - name: polaris-shared-config
+          configMap:
+            name: polaris-config
 ---
 apiVersion: v1
 kind: Service
