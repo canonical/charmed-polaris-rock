@@ -27,7 +27,8 @@ environment:
 
 services:
   polaris:
-    command: "/bin/bash /opt/polaris/bin/server"
+    command: bin/server
+    working-dir: /opt/polaris/
     summary: "Service to startup Polaris server."
     override: replace
     startup: enabled
@@ -63,3 +64,4 @@ parts:
       craftctl default
       chown -R ${POLARIS_UID}:${POLARIS_GID} opt/polaris
       chmod -R 750 opt/polaris
+      install -d -o ${POLARIS_UID} -g ${POLARIS_GID} -m 770 etc/polaris
