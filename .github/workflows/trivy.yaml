@@ -31,19 +31,19 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v8
         with:
-          name: polaris-${{ matrix.arch }}
-          path: polaris
+          name: charmed-polaris-${{ matrix.arch }}
+          path: charmed-polaris
 
       - name: Import locally
         run: |
           rockcraft.skopeo --insecure-policy copy \
-            docker-archive:$(find polaris -type f -name "*.tar") \
-            docker-daemon:trivy/polaris-${{ matrix.arch }}:latest
+            docker-archive:$(find charmed-polaris -type f -name "*.tar") \
+            docker-daemon:trivy/charmed-polaris-${{ matrix.arch }}:latest
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.35.0
         with:
-          image-ref: "trivy/polaris-${{ matrix.arch }}:latest"
+          image-ref: "trivy/charmed-polaris-${{ matrix.arch }}:latest"
           format: "sarif"
           output: "trivy-results.sarif"
           severity: "MEDIUM,HIGH,CRITICAL"

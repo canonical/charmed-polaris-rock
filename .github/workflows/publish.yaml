@@ -54,13 +54,13 @@ jobs:
       - name: Download amd64 artifact
         uses: actions/download-artifact@v8
         with:
-          name: polaris-amd64
+          name: charmed-polaris-amd64
           path: to_convert
 
       - name: Download arm64 artifact
         uses: actions/download-artifact@v8
         with:
-          name: polaris-arm64
+          name: charmed-polaris-arm64
           path: to_convert
 
       - name: Publish to GHCR
@@ -70,7 +70,7 @@ jobs:
               echo "Processing $file"
               rockcraft.skopeo --insecure-policy copy "docker-archive:${file}" "oci-archive:${file%.*}.rock"
           done
-          mv to_convert/polaris*.rock to_publish/
+          mv to_convert/charmed-polaris*.rock to_publish/
           cp rockcraft.yaml to_publish/
           release-rock --directory=to_publish/
         env:

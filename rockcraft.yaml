@@ -1,7 +1,7 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-name: polaris
+name: charmed-polaris
 base: ubuntu@24.04
 version: "1.5.0"
 summary: Apache Polaris rock OCI
@@ -13,8 +13,8 @@ description: |
   end-to-end, production ready data platform on top of cloud native
   technologies.
 license: Apache-2.0
-source-code: https://github.com/canonical/polaris-rock
-issues: https://github.com/canonical/polaris-rock/issues/new/choose
+source-code: https://github.com/canonical/charmed-polaris-rock
+issues: https://github.com/canonical/charmed-polaris-rock/issues/new/choose
 
 platforms:
   amd64:

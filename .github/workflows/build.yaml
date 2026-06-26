@@ -50,5 +50,5 @@ jobs:
       - name: Upload locally built artifact
         uses: actions/upload-artifact@v7
         with:
-          name: polaris-${{ matrix.system.arch }}
+          name: charmed-polaris-${{ matrix.system.arch }}
           path: ${{ steps.refine.outputs.tar }}

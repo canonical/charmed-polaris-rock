@@ -94,13 +94,13 @@ jobs:
       - name: Download packed charm(s)
         uses: actions/download-artifact@v8
         with:
-          name: polaris-${{ matrix.job.arch }}
-          path: polaris
+          name: charmed-polaris-${{ matrix.job.arch }}
+          path: charmed-polaris
           merge-multiple: true
 
       - name: Run spread job
         timeout-minutes: 110
         id: spread
         run: |
-          mv polaris/*.tar .
+          mv charmed-polaris/*.tar .
           ~/go/bin/spread -vv '${{ matrix.job.spread_job }}'

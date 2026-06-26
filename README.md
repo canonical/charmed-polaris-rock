@@ -1,9 +1,9 @@
-# Apache Polaris rock
+# Charmed Apache Polaris rock
 
-[![Container Registry](https://img.shields.io/badge/Container%20Registry-published-blue)](https://github.com/canonical/polaris-rock/pkgs/container/polaris)
-[![Release](https://github.com/canonical/polaris-rock/actions/workflows/publish.yaml/badge.svg)](https://github.com/canonical/polaris-rock/actions/workflows/publish.yaml)
+[![Container Registry](https://img.shields.io/badge/Container%20Registry-published-blue)](https://github.com/canonical/charmed-polaris-rock/pkgs/container/polaris)
+[![Release](https://github.com/canonical/charmed-polaris-rock/actions/workflows/publish.yaml/badge.svg)](https://github.com/canonical/charmed-polaris-rock/actions/workflows/publish.yaml)
 
-This repository contains the packaging metadata for creating a Apache Polaris rock (OCI compliant image).
+This repository contains the packaging metadata for creating a Charmed Apache Polaris rock (OCI compliant image).
 
 For more information on rocks, visit the [rockcraft Github](https://github.com/canonical/rockcraft).
 
@@ -22,8 +22,8 @@ multipass shell rock-dev
 ### Clone repository
 
 ```bash
-git clone https://github.com/canonical/polaris-rock.git
-cd polaris-rock
+git clone https://github.com/canonical/charmed-polaris-rock.git
+cd charmed-polaris-rock
 ```
 
 ### Installing tooling
@@ -37,7 +37,7 @@ sudo apt install podman
 
 ```bash
 rockcraft pack
-podman load < polaris_1.5.0_amd64.rock
+podman load < charmed-polaris_1.5.0_amd64.rock
 podman run -it --rm --name polaris --entrypoint /bin/bash localhost/1.5.0:latest
 ```
 

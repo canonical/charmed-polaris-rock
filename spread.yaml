@@ -1,7 +1,7 @@
 # Copyright 2026 Canonical Ltd.
 # See LICENSE file for licensing details.
 
-project: polaris-rock
+project: charmed-polaris-rock
 
 backends:
   # Derived from https://github.com/canonical/object-storage-integrator/blob/main/spread.yaml
@@ -81,7 +81,7 @@ backends:
 
 suites:
   tests/spread/:
-    summary: Integration tests for polaris-rock
+    summary: Integration tests for charmed-polaris-rock
 
 path: /root/spread_project
 
