@@ -4,9 +4,9 @@
 summary: Basic test suite
 
 systems:
-  - ubuntu-22.04
-  - self-hosted-linux-amd64-jammy-large
-  - self-hosted-linux-arm64-jammy-large
+  - ubuntu-24.04
+  - self-hosted-linux-amd64-noble-large
+  - self-hosted-linux-arm64-noble-large
 
 prepare: |
   microceph cluster bootstrap

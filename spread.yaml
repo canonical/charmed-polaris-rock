@@ -43,7 +43,7 @@ backends:
       VM_NAME="${VM_NAME:-${SPREAD_SYSTEM//./-}-${hash}}"
       lxc delete --force "${VM_NAME}"
     systems:
-      - ubuntu-22.04:
+      - ubuntu-24.04:
           username: runner
     prepare: |
       systemctl disable --now unattended-upgrades.service
@@ -74,9 +74,9 @@ backends:
     environment:
       CI: "$(HOST: echo $CI)"
     systems:
-      - self-hosted-linux-amd64-jammy-large:
+      - self-hosted-linux-amd64-noble-large:
           username: ubuntu
-      - self-hosted-linux-arm64-jammy-large:
+      - self-hosted-linux-arm64-noble-large:
           username: ubuntu
 
 suites:

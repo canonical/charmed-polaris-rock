@@ -46,7 +46,7 @@ jobs:
 
           jobs = []
           for job in spread_jobs:
-              # Example: "github-ci:self-hosted-linux-amd64-jammy-large:tests/spread/basic"
+              # Example: "github-ci:self-hosted-linux-amd64-noble-large:tests/spread/basic"
               _, runner, task = job.split(":")
               task_name = task.removeprefix("tests/spread/")
 
