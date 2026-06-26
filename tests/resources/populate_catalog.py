@@ -1,3 +1,6 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
 import pyarrow as pa
 from pyiceberg.schema import Schema
 from pyiceberg.types import LongType, NestedField, StringType
