@@ -11,7 +11,7 @@ def get_catalog() -> RestCatalog:
         "polaris",
         **{
             "uri": f"{os.environ['POLARIS_HOST']}/api/catalog",
-            "warehouse": os.environ.get("CATALOG_NAME", "warehouse"),
+            "warehouse": "warehouse",
             "credential": "root:s3cr3t",
             "scope": "PRINCIPAL_ROLE:ALL",
             "oauth2-server-uri": f"{os.environ['POLARIS_HOST']}/api/catalog/v1/oauth/tokens",
