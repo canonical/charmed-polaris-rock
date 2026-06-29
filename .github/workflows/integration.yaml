@@ -91,7 +91,7 @@ jobs:
           sudo snap install go --classic
           go install github.com/canonical/spread/cmd/spread@latest
 
-      - name: Download packed charm(s)
+      - name: Download packed rock
         uses: actions/download-artifact@v8
         with:
           name: charmed-polaris-${{ matrix.job.arch }}
