@@ -16,7 +16,7 @@ tar_file := rock_name + "_" + rock_version + "_" + arch + ".tar"
 
 # Lint and format files
 lint:
-    yamllint --no-warnings rockcraft.yaml
+    yamllint --no-warnings rockcraft.yaml spread.yaml tests/**/*.yaml tests/**/*.yaml.templ
     shfmt -l -w -i 4 tests
 
 # Pack the rock
