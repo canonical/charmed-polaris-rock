@@ -1,0 +1,46 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+summary: Persistence test suite
+
+systems:
+  - ubuntu-24.04
+  - self-hosted-linux-amd64-noble-large
+  - self-hosted-linux-arm64-noble-large
+
+prepare: |
+  microceph cluster bootstrap
+  microceph disk add loop,1G,3
+  microceph enable rgw
+  microceph.radosgw-admin user create \
+    --uid test --display-name test \
+    --access-key=foo --secret-key=bar
+
+  sudo snap install postgresql --channel=16/stable
+
+  IP=$(ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc')
+  PG_CONF=$(sudo find /var/snap/postgresql -name postgresql.conf | head -n 1)
+  PG_HBA=$(sudo find /var/snap/postgresql -name pg_hba.conf | head -n 1)
+
+  sudo sed -i "s|^#\\?listen_addresses.*|listen_addresses = '*'|" "$PG_CONF"
+  if ! sudo grep -q "host all all 0.0.0.0/0 scram-sha-256" "$PG_HBA"; then
+    sudo sed -i '1ihost all all 0.0.0.0/0 scram-sha-256' "$PG_HBA"
+    sudo sed -i '1ihost all postgres 127.0.0.1/32 trust' "$PG_HBA"
+  fi
+
+  sudo snap restart postgresql
+  sleep 5
+
+  postgresql.psql -U postgres -c "CREATE ROLE polaris LOGIN PASSWORD 'polaris'"
+  postgresql.psql -U postgres -c "CREATE DATABASE polaris OWNER polaris"
+
+  printf "S3_ENDPOINT=http://%s:80/\nACCESS_KEY=foo\nSECRET_KEY=bar\nDB_HOST=%s\nDB_USER=polaris\nDB_PASSWORD=polaris\nDB_NAME=polaris\n" \
+    "$IP" "$IP" > "$SPREAD_PATH/.env"
+
+  export AWS_ACCESS_KEY_ID=foo
+  export AWS_SECRET_ACCESS_KEY=bar
+  aws s3 mb --endpoint-url "http://${IP}:80" "s3://test-bucket"
+
+execute: |
+  cd "$SPREAD_PATH"
+  just test-persistence

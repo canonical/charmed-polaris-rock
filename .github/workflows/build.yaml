@@ -1,0 +1,54 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+name: Build ROCK
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        system:
+          - os: ubuntu-24.04
+            arch: amd64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.system.os }}
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup LXD
+        uses: canonical/setup-lxd@main
+        with:
+          channel: 6/stable
+
+      - name: Install tooling
+        run: |
+          sudo snap install yq
+          sudo snap install rockcraft --classic
+          sudo snap install regclient --classic
+          sudo snap install just --classic
+
+      - name: Build rock
+        id: build
+        run: |
+          rockcraft pack --verbose
+
+      - name: Add additional labels and export to tar
+        id: refine
+        run: |
+          just refine
+          echo "tar=$(just get-tar-file)" >> $GITHUB_OUTPUT
+
+      - name: Upload locally built artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: charmed-polaris-${{ matrix.system.arch }}
+          path: ${{ steps.refine.outputs.tar }}

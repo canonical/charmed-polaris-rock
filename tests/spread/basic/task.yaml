@@ -1,0 +1,28 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+summary: Basic test suite
+
+systems:
+  - ubuntu-24.04
+  - self-hosted-linux-amd64-noble-large
+  - self-hosted-linux-arm64-noble-large
+
+prepare: |
+  microceph cluster bootstrap
+  microceph disk add loop,1G,3
+  microceph enable rgw
+  microceph.radosgw-admin user create \
+    --uid test --display-name test \
+    --access-key=foo --secret-key=bar
+  IP=$(ip -4 -j route get 2.2.2.2 | jq -r '.[] | .prefsrc')
+  printf "S3_ENDPOINT=http://%s:80/\nACCESS_KEY=foo\nSECRET_KEY=bar\n" "$IP" \
+    > "$SPREAD_PATH/.env"
+
+  export AWS_ACCESS_KEY_ID=foo
+  export AWS_SECRET_ACCESS_KEY=bar
+  aws s3 mb --endpoint-url "http://${IP}:80" "s3://test-bucket"
+
+execute: |
+  cd "$SPREAD_PATH"
+  just test-basic

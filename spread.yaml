@@ -1,0 +1,114 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+project: charmed-polaris-rock
+
+backends:
+  # Derived from https://github.com/canonical/object-storage-integrator/blob/main/spread.yaml
+  lxd-vm:
+    # TODO: remove after https://github.com/canonical/spread/pull/185 merged & in rockcraft
+    type: adhoc
+    allocate: |
+      hash=$(python3 -c "import hashlib; print(hashlib.sha256('$SPREAD_PASSWORD'.encode()).hexdigest()[:6])")
+      VM_NAME="${VM_NAME:-${SPREAD_SYSTEM//./-}-${hash}}"
+      DISK="${DISK:-20}"
+      CPU="${CPU:-4}"
+      MEM="${MEM:-8}"
+
+      cloud_config="#cloud-config
+      ssh_pwauth: true
+      users:
+        - default
+        - name: runner
+          plain_text_passwd: $SPREAD_PASSWORD
+          lock_passwd: false
+          sudo: ALL=(ALL) NOPASSWD:ALL
+      "
+
+      lxc launch --vm \
+        "${SPREAD_SYSTEM//-/:}" \
+        "${VM_NAME}" \
+        -c user.user-data="${cloud_config}" \
+        -c limits.cpu="${CPU}" \
+        -c limits.memory="${MEM}GiB" \
+        -d root,size="${DISK}GiB"
+
+      # Wait for the runner user
+      while ! lxc exec "${VM_NAME}" -- id -u runner &>/dev/null; do sleep 0.5; done
+
+      # Set the instance address for spread
+      ADDRESS "$(lxc ls -f csv | grep "${VM_NAME}" | cut -d"," -f3 | cut -d" " -f1)"
+    discard: |
+      hash=$(python3 -c "import hashlib; print(hashlib.sha256('$SPREAD_PASSWORD'.encode()).hexdigest()[:6])")
+      VM_NAME="${VM_NAME:-${SPREAD_SYSTEM//./-}-${hash}}"
+      lxc delete --force "${VM_NAME}"
+    systems:
+      - ubuntu-24.04:
+          username: runner
+    prepare: |
+      systemctl disable --now unattended-upgrades.service
+      systemctl mask unattended-upgrades.service
+
+  github-ci:
+    type: adhoc
+    # Only run on CI
+    manual: true
+    # HACK: spread requires runners to be accessible via SSH
+    # Configure local sshd & instruct spread to connect to the same machine spread is running on
+    # (spread cannot provision GitHub Actions runners, so we provision a GitHub Actions runner for
+    # each spread job & select a single job when running spread)
+    allocate: |
+      sudo tee /etc/ssh/sshd_config.d/10-spread-github-ci.conf << 'EOF'
+      PasswordAuthentication yes
+      PermitEmptyPasswords yes
+      EOF
+
+      sudo systemctl daemon-reload
+      sudo systemctl restart ssh
+
+      sudo passwd --delete "$USER"
+
+      ADDRESS "127.0.0.1"
+    # HACK: spread does not pass environment variables set on runner
+    # Manually pass specific environment variables
+    environment:
+      CI: "$(HOST: echo $CI)"
+    systems:
+      - self-hosted-linux-amd64-noble-large:
+          username: ubuntu
+      - self-hosted-linux-arm64-noble-large:
+          username: ubuntu
+
+suites:
+  tests/spread/:
+    summary: Integration tests for charmed-polaris-rock
+
+path: /root/spread_project
+
+kill-timeout: 3h
+
+prepare: |
+  sleep 5
+  snap refresh --hold
+  chown -R root:root "$SPREAD_PATH"
+  cd "$SPREAD_PATH"
+  snap install --classic concierge
+  concierge prepare --trace -c tests/resources/concierge_ci.yaml
+
+  # Side load OCI
+  mkdir -p /var/snap/k8s/common/images
+  cp $(just get-tar-file) /var/snap/k8s/common/images/
+  sudo snap restart k8s.containerd
+  OCI_IMAGE=$(just get-oci)
+  sleep 30
+  if [ -z "$(sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io images list -q | grep "$OCI_IMAGE")" ]; then
+    sleep 30
+    if [ -z "$(sudo /snap/k8s/current/bin/ctr --address /run/containerd/containerd.sock --namespace k8s.io images list -q | grep "$OCI_IMAGE")" ]; then
+      echo "Test image not loaded"
+      exit 1
+    fi
+  fi
+
+  python3 -m venv "$SPREAD_PATH/.venv-tests"
+  "$SPREAD_PATH/.venv-tests/bin/pip" install -U pip
+  "$SPREAD_PATH/.venv-tests/bin/pip" install -r "$SPREAD_PATH/tests/requirements.txt"

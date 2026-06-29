@@ -1,0 +1,67 @@
+# Copyright 2026 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+name: charmed-polaris
+base: ubuntu@24.04
+version: "1.5.0"
+summary: Apache Polaris rock OCI
+description: |
+  This is an OCI image that bundles Apache Polaris together with other tools
+  of its ecosystem in order to be used in Charmed Operators, providing
+  automated operations management from day 0 to day 2 on the Apache Polaris
+  catalog for Apache Iceberg, on top of a K8s cluster. It is an open source,
+  end-to-end, production ready data platform on top of cloud native
+  technologies.
+license: Apache-2.0
+source-code: https://github.com/canonical/charmed-polaris-rock
+issues: https://github.com/canonical/charmed-polaris-rock/issues/new/choose
+
+platforms:
+  amd64:
+  arm64:
+
+run_user: _daemon_
+
+environment:
+  JAVA_HOME: /usr/lib/jvm/java-21-openjdk-${CRAFT_ARCH_BUILD_FOR}
+
+services:
+  polaris:
+    command: bin/server
+    working-dir: /opt/polaris/
+    summary: "Service to startup Polaris server."
+    override: replace
+    startup: enabled
+    on-success: shutdown
+    on-failure: shutdown
+
+parts:
+  polaris:
+    plugin: nil
+    source: https://downloads.apache.org/polaris/1.5.0/polaris-bin-1.5.0.tgz
+    source-checksum: sha512/05e5b717023d32ee5d120eb74aaeab93050b55a6df72012091a30a379a13be6112e5d93fbc951bae08d06da14cbc0833397c55b4fcced22729f2f2b17186c73b
+    overlay-packages:
+      - openjdk-21-jre-headless
+    override-build: |
+      mkdir -p $CRAFT_PART_INSTALL/opt/polaris
+
+      cp -r admin $CRAFT_PART_INSTALL/opt/polaris/
+      cp -r bin $CRAFT_PART_INSTALL/opt/polaris/
+      cp -r server $CRAFT_PART_INSTALL/opt/polaris/
+      cp -r LICENSE $CRAFT_PART_INSTALL/opt/polaris/
+      cp -r NOTICE $CRAFT_PART_INSTALL/opt/polaris/
+
+    stage:
+      - opt/polaris
+
+  non-root-user:
+    after: [polaris]
+    plugin: nil
+    override-prime: |
+      POLARIS_GID=584792
+      POLARIS_UID=584792
+
+      craftctl default
+      chown -R ${POLARIS_UID}:${POLARIS_GID} opt/polaris
+      chmod -R 750 opt/polaris
+      install -d -o ${POLARIS_UID} -g ${POLARIS_GID} -m 770 etc/polaris

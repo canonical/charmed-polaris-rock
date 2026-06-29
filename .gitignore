@@ -1,0 +1,6 @@
+*.rock
+*.tar
+.env
+__pycache__/
+*.py[cod]
+.vscode
