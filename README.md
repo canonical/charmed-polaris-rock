@@ -1,6 +1,6 @@
 # Charmed Apache Polaris rock
 
-[![Container Registry](https://img.shields.io/badge/Container%20Registry-published-blue)](https://github.com/canonical/charmed-polaris-rock/pkgs/container/polaris)
+[![Container Registry](https://img.shields.io/badge/Container%20Registry-published-blue)](https://github.com/canonical/charmed-polaris-rock/pkgs/container/charmed-polaris)
 [![Release](https://github.com/canonical/charmed-polaris-rock/actions/workflows/publish.yaml/badge.svg)](https://github.com/canonical/charmed-polaris-rock/actions/workflows/publish.yaml)
 
 This repository contains the packaging metadata for creating a Charmed Apache Polaris rock (OCI compliant image).
