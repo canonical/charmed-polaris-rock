@@ -38,8 +38,8 @@ services:
 parts:
   polaris:
     plugin: nil
-    source: https://downloads.apache.org/polaris/1.5.0/polaris-bin-1.5.0.tgz
-    source-checksum: sha512/05e5b717023d32ee5d120eb74aaeab93050b55a6df72012091a30a379a13be6112e5d93fbc951bae08d06da14cbc0833397c55b4fcced22729f2f2b17186c73b
+    source: https://github.com/canonical/central-uploader/releases/download/polaris-1.5.0-ubuntu0/polaris-1.5.0-ubuntu0-20260703073645.tgz
+    source-checksum: sha512/98b7ba67ff6ad9b39ffaf6f93859f7b7517475cd14cd3ac6ce98a7da48f99f79dc8695aadab28325d265233f5c41d13d1f306b18fbc586bb7a6d162b05593f31
     overlay-packages:
       - openjdk-21-jre-headless
     override-build: |
