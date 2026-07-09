@@ -22,7 +22,7 @@ jobs:
         arch: [amd64, arm64]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install rockcraft (for skopeo)
         run: |
@@ -34,19 +34,28 @@ jobs:
           name: charmed-polaris-${{ matrix.arch }}
           path: charmed-polaris
 
-      - name: Import locally
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: .cache/trivy
+          key: ${{ runner.os }}-trivy-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-trivy-
+
+      - name: Import image locally
         run: |
           rockcraft.skopeo --insecure-policy copy \
             docker-archive:$(find charmed-polaris -type f -name "*.tar") \
-            docker-daemon:trivy/charmed-polaris-${{ matrix.arch }}:latest
+            docker-daemon:trivy/charmed-polaris-${{ matrix.arch }}:${{ github.sha }}
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: "trivy/charmed-polaris-${{ matrix.arch }}:latest"
+          image-ref: "trivy/charmed-polaris-${{ matrix.arch }}:${{ github.sha }}"
           format: "sarif"
           output: "trivy-results.sarif"
           severity: "MEDIUM,HIGH,CRITICAL"
+          trivyignores: .trivyignore
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
