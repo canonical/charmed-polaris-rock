@@ -46,11 +46,11 @@ jobs:
 
           jobs = []
           for job in spread_jobs:
-              # Example: "github-ci:self-hosted-linux-amd64-noble-large:tests/spread/basic"
+              # Example: "github-ci:ubuntu-24.04:tests/spread/basic"
               _, runner, task = job.split(":")
               task_name = task.removeprefix("tests/spread/")
 
-              if "arm64" in runner:
+              if "arm" in runner:
                   architecture = "arm64"
               else:
                   architecture = "amd64"
@@ -83,6 +83,30 @@ jobs:
     runs-on: ${{ matrix.job.runner }}
     timeout-minutes: 120
     steps:
+      - name: Free up disk space
+        timeout-minutes: 10
+        run: |
+          sudo rm -rf \
+            /opt/google \
+            /opt/hostedtoolcache \
+            /opt/microsoft/powershell \
+            /opt/microsoft/msedge \
+            "$AGENT_TOOLSDIRECTORY" \
+            /usr/lib/firefox \
+            /usr/lib/mono \
+            /usr/local/julia* \
+            /usr/local/lib/android \
+            /usr/local/share/chromium \
+            /usr/local/share/powershell \
+            /usr/share/dotnet \
+            /usr/share/gradle* \
+            /usr/share/miniconda \
+            /usr/share/sbt \
+            /usr/share/swift \
+            /home/linuxbrew
+          printf '\nDisk usage\n'
+          df --human-readable
+
       - name: Checkout
         uses: actions/checkout@v7
 
