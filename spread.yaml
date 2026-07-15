@@ -74,10 +74,10 @@ backends:
     environment:
       CI: "$(HOST: echo $CI)"
     systems:
-      - self-hosted-linux-amd64-noble-large:
-          username: ubuntu
-      - self-hosted-linux-arm64-noble-large:
-          username: ubuntu
+      - ubuntu-24.04:
+          username: runner
+      - ubuntu-24.04-arm:
+          username: runner
 
 suites:
   tests/spread/:
