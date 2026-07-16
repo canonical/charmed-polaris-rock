@@ -37,8 +37,8 @@ sudo apt install podman
 
 ```bash
 rockcraft pack
-podman load < charmed-polaris_1.5.0_amd64.rock
-podman run -it --rm --name polaris --entrypoint /bin/bash localhost/1.5.0:latest
+podman load < charmed-polaris_1.6.0_amd64.rock
+podman run -it --rm --name polaris --entrypoint /bin/bash localhost/1.6.0:latest
 ```
 
 ## Licence statement
