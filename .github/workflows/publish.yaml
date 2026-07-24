@@ -16,19 +16,20 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-rock:
     uses: ./.github/workflows/build.yaml
 
   trivy:
-    needs: build
+    needs: build-rock
     uses: ./.github/workflows/trivy.yaml
+    with:
+      submit_dependency_graph: true
     permissions:
-      actions: read
-      contents: read
+      contents: write # dependency graph
       security-events: write
 
   publish:
-    needs: [build, trivy]
+    needs: [build-rock, trivy]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
