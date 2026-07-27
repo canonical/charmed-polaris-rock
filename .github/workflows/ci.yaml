@@ -43,6 +43,5 @@ jobs:
     needs: [build-rock]
     uses: ./.github/workflows/trivy.yaml
     permissions:
-      actions: read
       contents: read
       security-events: write
