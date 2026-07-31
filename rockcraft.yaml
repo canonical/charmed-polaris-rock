@@ -25,6 +25,7 @@ run_user: _daemon_
 
 environment:
   JAVA_HOME: /usr/lib/jvm/java-21-openjdk-${CRAFT_ARCH_BUILD_FOR}
+  PATH: /usr/lib/jvm/java-21-openjdk-${CRAFT_ARCH_BUILD_FOR}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 services:
   polaris:
@@ -41,8 +42,6 @@ parts:
     plugin: nil
     source: https://github.com/canonical/central-uploader/releases/download/polaris-1.8.0-ubuntu0/polaris-1.8.0-ubuntu0-20260929161302.tgz
     source-checksum: sha512/486eebf2ecef2b76a1c1cf319ea9fd4394c163063f02ea679be2cf68157509ab6476c1089b66d766d3ab6369384010640277743bb4a461471d35b8f876b70017
-    overlay-packages:
-      - openjdk-21-jre-headless
     override-build: |
       mkdir -p $CRAFT_PART_INSTALL/opt/polaris
 
@@ -73,8 +72,29 @@ parts:
     stage:
       - opt/polaris
 
+  runtime:
+    plugin: nil
+    # We need bash, /usr/bin/env, env, dirname, pwd for the entrypoint.
+    # For Polaris itself we need the JRE, the native management libs and keytool.
+    build-packages:
+      - openjdk-21-jre-headless
+      - ca-certificates-java
+    override-build: |
+      craftctl default
+      mkdir -p "${CRAFT_PART_INSTALL}/etc/ssl/certs/java"
+      cp -L /etc/ssl/certs/java/cacerts "${CRAFT_PART_INSTALL}/etc/ssl/certs/java/cacerts"
+    stage-packages:
+      - base-files_base
+      - bash_bins
+      - coreutils_bins
+      - openjdk-21-jre-headless_console
+      - openjdk-21-jre-headless_core
+      - openjdk-21-jre-headless_management
+      - openjdk-21-jre-headless_security
+      - openjdk-21-jre-headless_tools
+
   non-root-user:
-    after: [polaris]
+    after: [polaris, runtime]
     plugin: nil
     override-prime: |
       POLARIS_GID=584792
