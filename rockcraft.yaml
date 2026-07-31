@@ -2,7 +2,8 @@
 # See LICENSE file for licensing details.
 
 name: charmed-polaris
-base: ubuntu@24.04
+base: bare
+build-base: ubuntu@24.04
 version: "1.8.0"
 summary: Apache Polaris rock OCI
 description: |
