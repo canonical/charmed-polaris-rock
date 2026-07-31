@@ -41,9 +41,6 @@ parts:
     plugin: nil
     source: https://github.com/canonical/central-uploader/releases/download/polaris-1.6.0-ubuntu0/polaris-1.6.0-ubuntu0-20260715173133.tgz
     source-checksum: sha512/850d3c06a7feddf2d04342e99f379dce1a3b9484c98298f15c53410bd03e8d037541d71976e4a6bc6e16bbc30d036af20cc0556895cd15f1b52504316cf799f5
-    stage-packages:
-      - base-files
-      - openjdk-21-jre-headless
     override-build: |
       mkdir -p $CRAFT_PART_INSTALL/opt/polaris
 
@@ -74,8 +71,24 @@ parts:
     stage:
       - opt/polaris
 
+  runtime:
+    plugin: nil
+    # We need bash, /usr/bin/env, env, dirname, pwd for the entrypoint.
+    # For Polaris itself we need the JRE, the native management libs and keytool.
+    stage-packages:
+      - base-files_base
+      - bash_bins
+      - coreutils_dirname
+      - coreutils_env
+      - coreutils_working-context
+      - openjdk-21-jre-headless_console
+      - openjdk-21-jre-headless_core
+      - openjdk-21-jre-headless_management
+      - openjdk-21-jre-headless_security
+      - openjdk-21-jre-headless_tools
+
   non-root-user:
-    after: [polaris]
+    after: [polaris, runtime]
     plugin: nil
     override-prime: |
       POLARIS_GID=584792
