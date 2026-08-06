@@ -38,8 +38,8 @@ services:
 parts:
   polaris:
     plugin: nil
-    source: https://github.com/canonical/central-uploader/releases/download/polaris-1.6.0-ubuntu0/polaris-1.6.0-ubuntu0-20260715173133.tgz
-    source-checksum: sha512/850d3c06a7feddf2d04342e99f379dce1a3b9484c98298f15c53410bd03e8d037541d71976e4a6bc6e16bbc30d036af20cc0556895cd15f1b52504316cf799f5
+    source: https://github.com/canonical/central-uploader/releases/download/polaris-1.6.0-ubuntu1/polaris-1.6.0-ubuntu1-20260731142205.tgz
+    source-checksum: sha512/d06c6259cf468ec835de0bc923572e7fd22cce24d13e8666327fcbe350af6df807e2dfac4d35600721aedb999b0363b75a8a31e25a4c41d8a36081fc5ba41baa
     overlay-packages:
       - openjdk-21-jre-headless
     override-build: |
@@ -50,6 +50,24 @@ parts:
       cp -r server $CRAFT_PART_INSTALL/opt/polaris/
       cp -r LICENSE $CRAFT_PART_INSTALL/opt/polaris/
       cp -r NOTICE $CRAFT_PART_INSTALL/opt/polaris/
+
+      # Note: the Polaris bin distribution is composed of two applications
+      # (server and admin) with numerous common jars.
+      # Upstream made the choice of having two different images, whereas bundling the admin
+      # tool with the server fits better our approach to charming operators.
+      # By converting files under polaris/admin into hard links to their polaris/server counterpart,
+      # the OCI layer stores them only once.
+      while IFS= read -r -d '' admin_file; do
+        rel_path="${admin_file#$CRAFT_PART_INSTALL/opt/polaris/admin/}"
+        server_file="$CRAFT_PART_INSTALL/opt/polaris/server/$rel_path"
+
+        if [ -f "$server_file" ] \
+          && [ "$(stat -c %s "$admin_file")" -eq "$(stat -c %s "$server_file")" ] \
+          && cmp -s "$admin_file" "$server_file"; then
+          rm "$admin_file"
+          ln "$server_file" "$admin_file"
+        fi
+      done < <(find "$CRAFT_PART_INSTALL/opt/polaris/admin" -type f -print0)
 
     stage:
       - opt/polaris
