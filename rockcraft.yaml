@@ -3,7 +3,7 @@
 
 name: charmed-polaris
 base: ubuntu@24.04
-version: "1.6.0"
+version: "1.7.0"
 summary: Apache Polaris rock OCI
 description: |
   This is an OCI image that bundles Apache Polaris together with other tools
@@ -38,8 +38,8 @@ services:
 parts:
   polaris:
     plugin: nil
-    source: https://github.com/canonical/central-uploader/releases/download/polaris-1.6.0-ubuntu1/polaris-1.6.0-ubuntu1-20260731142205.tgz
-    source-checksum: sha512/d06c6259cf468ec835de0bc923572e7fd22cce24d13e8666327fcbe350af6df807e2dfac4d35600721aedb999b0363b75a8a31e25a4c41d8a36081fc5ba41baa
+    source: https://github.com/canonical/central-uploader/releases/download/polaris-1.7.0-ubuntu0/polaris-1.7.0-ubuntu0-20260825093137.tgz
+    source-checksum: sha512/d670badeec087bfa59de4dd471ffc92d06d828141737a8fd51870e0b78b52cf1d48e8770204cb2517ef42bd0d1e5e4699dedf3a5b2654e9163b6ee417972a272
     overlay-packages:
       - openjdk-21-jre-headless
     override-build: |
