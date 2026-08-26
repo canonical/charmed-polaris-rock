@@ -22,10 +22,10 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup LXD
-        uses: canonical/setup-lxd@main
+        uses: canonical/setup-lxd@da2ac84e727dc534215fd14cd088b9209d65893b # main
         with:
           channel: 6/stable
 
@@ -48,7 +48,7 @@ jobs:
           echo "tar=$(just get-tar-file)" >> $GITHUB_OUTPUT
 
       - name: Upload locally built artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: charmed-polaris-${{ matrix.system.arch }}
           path: ${{ steps.refine.outputs.tar }}
