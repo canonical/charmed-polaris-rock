@@ -29,6 +29,9 @@ prepare: |
   postgresql.psql -U postgres -c "CREATE ROLE polaris LOGIN PASSWORD 'polaris'"
   postgresql.psql -U postgres -c "CREATE DATABASE polaris OWNER polaris"
 
+  # from polaris 1.8.0, the database admin has to create the metastore schema.
+  postgresql.psql -U postgres -d polaris -c "CREATE SCHEMA polaris_schema AUTHORIZATION polaris"
+
   printf "S3_ENDPOINT=http://%s:80/\nACCESS_KEY=foo\nSECRET_KEY=bar\nDB_HOST=%s\nDB_USER=polaris\nDB_PASSWORD=polaris\nDB_NAME=polaris\n" \
     "$IP" "$IP" > "$SPREAD_PATH/.env"
 
