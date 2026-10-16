@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup LXD
-        uses: canonical/setup-lxd@da2ac84e727dc534215fd14cd088b9209d65893b # main
+        uses: canonical/setup-lxd@e3ef25fc529b40aa403b264cdf44e7882b361164 # main
         with:
           channel: 6/stable
 
@@ -48,7 +48,7 @@ jobs:
           echo "tar=$(just get-tar-file)" >> $GITHUB_OUTPUT
 
       - name: Upload locally built artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: charmed-polaris-${{ matrix.system.arch }}
           path: ${{ steps.refine.outputs.tar }}
