@@ -53,13 +53,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download amd64 artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: charmed-polaris-amd64
           path: to_convert
 
       - name: Download arm64 artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: charmed-polaris-arm64
           path: to_convert
