@@ -74,8 +74,11 @@ parts:
 
   runtime:
     plugin: nil
-    # We need bash, /usr/bin/env, env, dirname, pwd for the entrypoint.
-    # For Polaris itself we need the JRE, the native management libs and keytool.
+    # Note:
+    # Polaris' entrypoint requires bash, /usr/bin/env, env, dirname and pwd.
+    # The workload itself needs the JRE and the native management libs.
+    # Finally, the charm code needs the defaut Java cacerts, keytool, chown, chmod and cp.
+    # To get the subset of utilities we need, we use the coreutils_bins slice.
     build-packages:
       - openjdk-21-jre-headless
       - ca-certificates-java
@@ -87,7 +90,6 @@ parts:
       - base-files_base
       - bash_bins
       - coreutils_bins
-      - openjdk-21-jre-headless_console
       - openjdk-21-jre-headless_core
       - openjdk-21-jre-headless_management
       - openjdk-21-jre-headless_security
