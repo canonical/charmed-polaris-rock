@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup LXD
-        uses: canonical/setup-lxd@e3ef25fc529b40aa403b264cdf44e7882b361164 # main
+        uses: canonical/setup-lxd@e38f436c468900dfe2b6ca98fb8eb352bbbb917a # main
         with:
           channel: 6/stable
 
