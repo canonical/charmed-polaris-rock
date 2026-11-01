@@ -82,7 +82,7 @@ expect_http_code() {
         fi
     done
 
-    cat "$response"
+    echo "$response"
     return 1
 }
 
@@ -118,10 +118,15 @@ create_catalog() {
 EOF
 
     http_code=$(polaris_api POST "/api/management/v1/catalogs" "@${payload}" "$response")
+
+    sleep 2
+
     if [ "$http_code" = "409" ]; then
         http_code=$(polaris_api PUT "/api/management/v1/catalogs/${CATALOG_NAME}" "@${payload}" "$response")
     fi
     expect_http_code "$response" "$http_code" 200 201
+
+    sleep 2
 
     http_code=$(polaris_api POST "/api/management/v1/catalogs/${CATALOG_NAME}/catalog-roles" "$role_payload" "$response")
     expect_http_code "$response" "$http_code" 200 201 409
