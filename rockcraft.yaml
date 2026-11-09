@@ -3,7 +3,7 @@
 
 name: charmed-polaris
 base: bare
-build-base: ubuntu@24.04
+build-base: ubuntu@26.04
 version: "1.8.0"
 summary: Apache Polaris rock OCI
 description: |
@@ -81,7 +81,7 @@ parts:
     # To get the subset of utilities we need, we use the coreutils_bins slice.
     #
     # Other additions: chisel manifest, used to detect vulnerabilities and
-    # information on the OS the rock is based on (24.04)
+    # information on the OS the rock is based on (26.04)
     build-packages:
       - openjdk-21-jre-headless
       - ca-certificates-java

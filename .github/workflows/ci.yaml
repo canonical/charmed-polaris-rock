@@ -16,7 +16,7 @@ permissions:
 jobs:
   lint:
     name: Lint rockcraft.yaml
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Checkout repository
