@@ -4,7 +4,7 @@
 name: charmed-polaris
 base: bare
 build-base: ubuntu@24.04
-version: "1.8.0"
+version: "1.9.0"
 summary: Apache Polaris rock OCI
 description: |
   This is an OCI image that bundles Apache Polaris together with other tools
@@ -40,8 +40,8 @@ services:
 parts:
   polaris:
     plugin: nil
-    source: https://github.com/canonical/central-uploader/releases/download/polaris-1.8.0-ubuntu0/polaris-1.8.0-ubuntu0-20260929161302.tgz
-    source-checksum: sha512/486eebf2ecef2b76a1c1cf319ea9fd4394c163063f02ea679be2cf68157509ab6476c1089b66d766d3ab6369384010640277743bb4a461471d35b8f876b70017
+    source: https://github.com/canonical/central-uploader/releases/download/polaris-1.9.0-ubuntu0/polaris-1.9.0-ubuntu0-20261117165042.tgz
+    source-checksum: sha512/5fb289f4740882db863ca22c20d5ec418d5352adee11807e78df6eac269da8da710065aa95c5ba6cfcc1c503509430fc3deb35b68d1d2f9114479b352d293515
     override-build: |
       mkdir -p $CRAFT_PART_INSTALL/opt/polaris
 
@@ -80,8 +80,9 @@ parts:
     # Finally, the charm code needs the defaut Java cacerts, keytool, chown, chmod and cp.
     # To get the subset of utilities we need, we use the coreutils_bins slice.
     #
-    # Other additions: chisel manifest, used to detect vulnerabilities and
-    # information on the OS the rock is based on (24.04)
+    # Other additions:
+    # - chisel manifest, used to detect vulnerabilities and information on the build OS
+    # - dash_bin brings /usr/bin/sh, needed for `juju ssh --container polaris`
     build-packages:
       - openjdk-21-jre-headless
       - ca-certificates-java
@@ -95,6 +96,7 @@ parts:
       - base-files_release-info
       - bash_bins
       - coreutils_bins
+      - dash_bins
       - openjdk-21-jre-headless_core
       - openjdk-21-jre-headless_management
       - openjdk-21-jre-headless_security
