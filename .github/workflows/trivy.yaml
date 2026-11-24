@@ -41,36 +41,74 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-trivy-
 
-      - name: Import image locally
+      - name: Import and unpack image
         run: |
+          TAR_FILE=$(find charmed-polaris -type f -name "*.tar")
           rockcraft.skopeo --insecure-policy copy \
-            docker-archive:$(find charmed-polaris -type f -name "*.tar") \
-            docker-daemon:trivy/charmed-polaris-${{ matrix.arch }}:${{ github.sha }}
+            "docker-archive:${TAR_FILE}" \
+            oci:polaris:latest
+          rockcraft.skopeo --insecure-policy copy \
+            oci:polaris:latest \
+            "docker-daemon:trivy/charmed-polaris-${{ matrix.arch }}:${{ github.sha }}"
+          /snap/rockcraft/current/bin/umoci unpack --rootless --image polaris:latest extracted
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8
-        # v0.36.0
+      # Trivy cannot currently report CVEs from slices. Therefore, we create a SBOM file with ssbom
+      # and run the scan on it, in addition to the scan on the image like we previously had.
+      # To do it, we extract the filesystem so that ssbom can access the chisel manifest and the os release info.
+      - name: Generate Chisel SPDX SBOM
+        run: |
+          go install github.com/canonical/ssbom/cmd/ssbom@latest
+          "$(go env GOPATH)/bin/ssbom" extracted/rootfs "chisel.spdx.json"
+
+      # Binary scan, pebble + any non slice package
+      - name: Run Trivy image vulnerability scanner
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
           image-ref: "trivy/charmed-polaris-${{ matrix.arch }}:${{ github.sha }}"
           format: "sarif"
-          output: "trivy-results.sarif"
+          output: "trivy-image-results.sarif"
           severity: "MEDIUM,HIGH,CRITICAL"
           trivyignores: .trivyignore
 
-      - name: Upload Trivy scan results to GitHub Security tab
+      - name: Upload image Trivy results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
-        if: always()
         with:
-          sarif_file: "trivy-results.sarif"
+          sarif_file: "trivy-image-results.sarif"
           category: ${{ matrix.arch }}
 
-      - name: Run Trivy in GitHub SBOM mode and submit results to Dependency Graph
-        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8
-        # v0.36.0
+      # Chisel OS slices scan (via ssbom)
+      - name: Run Trivy Chisel SBOM vulnerability scanner
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: "sbom"
+          scan-ref: "chisel.spdx.json"
+          format: "sarif"
+          output: "trivy-chisel-results.sarif"
+          severity: "MEDIUM,HIGH,CRITICAL"
+          trivyignores: .trivyignore
+
+      - name: Upload Chisel Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4
+        with:
+          sarif_file: "trivy-chisel-results.sarif"
+          category: "${{ matrix.arch }}-chisel"
+
+      - name: Run Trivy in GitHub SBOM mode and submit image results to Dependency Graph
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         if: ${{ inputs.submit_dependency_graph }}
         with:
           scan-type: "image"
           format: "github"
-          output: "dependency-results-${{ matrix.arch }}.sbom.json"
+          output: "dependency-results-image-${{ matrix.arch }}.sbom.json"
           image-ref: "trivy/charmed-polaris-${{ matrix.arch }}:${{ github.sha }}"
+          github-pat: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Submit Chisel SBOM to GitHub Dependency Graph
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        if: ${{ inputs.submit_dependency_graph }}
+        with:
+          scan-type: "sbom"
+          scan-ref: "chisel.spdx.json"
+          format: "github"
+          output: "dependency-results-chisel-${{ matrix.arch }}.sbom.json"
           github-pat: ${{ secrets.GITHUB_TOKEN }}
